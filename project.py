@@ -42,17 +42,51 @@ def get_weather(city, api_key, unit='metric'):
     except requests.RequestException as e:
         return f"Error retrieving weather data: {e}"
 
+def get_weather_forecast(city, api_key, unit='metric'):
+    base_url = "http://api.openweathermap.org/data/2.5/forecast?"
+    unit_str = '°C' if unit == 'metric' else '°F'
+    complete_url = f"{base_url}appid={api_key}&q={city}&units={unit}"
+
+    try:
+        response = requests.get(complete_url)
+        forecast_data = response.json()
+
+        if forecast_data['cod'] != "404":
+            forecast_report = "5-Day Weather Forecast:\n"
+            for item in forecast_data['list']:
+                date_time = datetime.fromtimestamp(item['dt']).strftime('%Y-%m-%d %H:%M:%S')
+                temperature = item['main']['temp']
+                description = item['weather'][0]['description']
+                forecast_report += (f"{date_time}: Temp: {temperature:.2f}{unit_str}, "
+                                    f"Description: {description.capitalize()}\n")
+        else:
+            forecast_report = "City Not Found!"
+
+        return forecast_report
+
+    except requests.RequestException as e:
+        return f"Error retrieving weather forecast: {e}"
+
 def main():
-    api_key = "YOUR_API_KEY"  # Replace with your API key
+    api_key = "test"
     city = input("Enter city name: ")
     unit = input("Choose temperature unit - Celsius (C) or Fahrenheit (F): ").lower()
     unit = 'metric' if unit == 'c' else 'imperial'
 
-    print("\nWeather Report:")
-    print(get_weather(city, api_key, unit))
+    choice = input("Choose option: 1. Current Weather 2. 5-Day Forecast\n")
+
+    if choice == '1':
+        print("\nCurrent Weather Report:")
+        print(get_current_weather(city, api_key, unit))
+    elif choice == '2':
+        print("\nWeather Forecast:")
+        print(get_weather_forecast(city, api_key, unit))
+    else:
+        print("Invalid choice. Please select 1 or 2.")
 
 if __name__ == "__main__":
     main()
+
 
 
 
