@@ -6,36 +6,50 @@ from platform import version
 from platform import python_implementation, python_version_tuple
 import os
 import requests
+from datetime import datetime
 
-
-
-def get_weather(city, api_key):
+def get_weather(city, api_key, unit='metric'):
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
-    complete_url = base_url + "appid=" + api_key + "&q=" + city
-    response = requests.get(complete_url)
-    weather_data = response.json()
+    unit_str = '°C' if unit == 'metric' else '°F'
+    complete_url = f"{base_url}appid={api_key}&q={city}&units={unit}"
 
-    if weather_data['cod'] != 404:
-        main_data = weather_data['main']
-        temperature = main_data['temp'] - 273.15 
-        pressure = main_data['pressure']
-        humidity = main_data['humidity']
-        weather_description = weather_data['weather'][0]['description']
+    try:
+        response = requests.get(complete_url)
+        weather_data = response.json()
 
-        weather_report = (f"Temperature: {temperature:.2f}°C\n"
-                          f"Atmospheric Pressure: {pressure} hPa\n"
-                          f"Humidity: {humidity}%\n"
-                          f"Description: {weather_description.capitalize()}")
-    else:
-        weather_report = "City Not Found!"
+        if weather_data['cod'] != 404:
+            main_data = weather_data['main']
+            temperature = main_data['temp']
+            pressure = main_data['pressure']
+            humidity = main_data['humidity']
+            weather_description = weather_data['weather'][0]['description']
+            wind_speed = weather_data['wind']['speed']
+            sunrise_time = datetime.fromtimestamp(weather_data['sys']['sunrise']).strftime('%H:%M:%S')
+            sunset_time = datetime.fromtimestamp(weather_data['sys']['sunset']).strftime('%H:%M:%S')
 
-    return weather_report
+            weather_report = (f"Temperature: {temperature:.2f}{unit_str}\n"
+                              f"Atmospheric Pressure: {pressure} hPa\n"
+                              f"Humidity: {humidity}%\n"
+                              f"Description: {weather_description.capitalize()}\n"
+                              f"Wind Speed: {wind_speed} m/s\n"
+                              f"Sunrise: {sunrise_time}\n"
+                              f"Sunset: {sunset_time}")
+        else:
+            weather_report = "City Not Found!"
+
+        return weather_report
+
+    except requests.RequestException as e:
+        return f"Error retrieving weather data: {e}"
 
 def main():
-    api_key = "test"  
+    api_key = "YOUR_API_KEY"  # Replace with your API key
     city = input("Enter city name: ")
+    unit = input("Choose temperature unit - Celsius (C) or Fahrenheit (F): ").lower()
+    unit = 'metric' if unit == 'c' else 'imperial'
+
     print("\nWeather Report:")
-    print(get_weather(city, api_key))
+    print(get_weather(city, api_key, unit))
 
 if __name__ == "__main__":
     main()
