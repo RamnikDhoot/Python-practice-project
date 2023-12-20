@@ -48,33 +48,57 @@ def display_weather():
     unit = 'metric' if var.get() == 1 else 'imperial'
     forecast = forecast_var.get() == 1
     weather_report = fetch_weather(city, "YOUR_API_KEY", unit, forecast)
-    result_label.config(text=weather_report)
+
+    if "Error" in weather_report or "Not Found" in weather_report:
+        messagebox.showerror("Error", weather_report)
+    else:
+        result_text.delete(1.0, tk.END)
+        result_text.insert(tk.END, weather_report)
+
+def save_report():
+    report = result_text.get(1.0, tk.END)
+    if report.strip():
+        file = filedialog.asksaveasfilename(defaultextension=".txt",
+                                            filetypes=[("Text files", "*.txt"), ("All files", "*.*")])
+        if file:
+            with open(file, "w") as file:
+                file.write(report)
+    else:
+        messagebox.showinfo("Info", "No report to save.")
 
 # GUI setup
 root = tk.Tk()
 root.title("Weather App")
+root.geometry("400x500")
+
+# Frame for input fields
+input_frame = tk.Frame(root)
+input_frame.pack(pady=10)
 
 # City entry
-tk.Label(root, text="City:").pack()
-city_entry = tk.Entry(root)
-city_entry.pack()
+tk.Label(input_frame, text="City:").grid(row=0, column=0, padx=10)
+city_entry = tk.Entry(input_frame, width=20)
+city_entry.grid(row=0, column=1, padx=10)
 
 # Temperature unit radio buttons
 var = tk.IntVar()
 var.set(1)
-tk.Radiobutton(root, text="Celsius", variable=var, value=1).pack()
-tk.Radiobutton(root, text="Fahrenheit", variable=var, value=2).pack()
+tk.Radiobutton(input_frame, text="Celsius", variable=var, value=1).grid(row=1, column=0)
+tk.Radiobutton(input_frame, text="Fahrenheit", variable=var, value=2).grid(row=1, column=1)
 
 # Forecast checkbox
 forecast_var = tk.IntVar()
-tk.Checkbutton(root, text="5-Day Forecast", variable=forecast_var).pack()
+tk.Checkbutton(input_frame, text="5-Day Forecast", variable=forecast_var).grid(row=2, columnspan=2)
 
 # Submit button
-tk.Button(root, text="Get Weather", command=display_weather).pack()
+tk.Button(root, text="Get Weather", command=display_weather).pack(pady=10)
 
-# Result label
-result_label = tk.Label(root, text="", justify=tk.LEFT)
-result_label.pack()
+# Text box for results
+result_text = tk.Text(root, height=15, width=45)
+result_text.pack(pady=10)
+
+# Save button
+tk.Button(root, text="Save Report", command=save_report).pack()
 
 # Run the application
 root.mainloop()
