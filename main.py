@@ -1,10 +1,14 @@
+import time
 import module
 #When a module is imported, its contents are implicitly executed by Python. It gives the module the chance to initialize some of its internal aspects
 
 import requests
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog, ttk
 from datetime import datetime
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import threading
 
 def fetch_weather(city, api_key, unit, forecast=False):
     base_url = "http://api.openweathermap.org/data/2.5/"
@@ -42,6 +46,20 @@ def fetch_weather(city, api_key, unit, forecast=False):
 
     except requests.RequestException as e:
         return f"Error: {e}"
+    
+def plot_forecast(forecast_data):
+    dates = [datetime.fromtimestamp(item['dt']) for item in forecast_data['list']]
+    temps = [item['main']['temp'] for item in forecast_data['list']]
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(dates, temps, marker='o')
+    plt.xlabel('Date and Time')
+    plt.ylabel('Temperature')
+    plt.title('5-Day Temperature Forecast')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    return plt.gcf()
 
 def display_weather():
     city = city_entry.get()
@@ -54,6 +72,11 @@ def display_weather():
     else:
         result_text.delete(1.0, tk.END)
         result_text.insert(tk.END, weather_report)
+
+def refresh_weather(interval=3600):
+    while True:
+        display_weather()
+        time.sleep(interval)
 
 def save_report():
     report = result_text.get(1.0, tk.END)
@@ -100,5 +123,8 @@ result_text.pack(pady=10)
 # Save button
 tk.Button(root, text="Save Report", command=save_report).pack()
 
-# Run the application
+# Add a thread for live updates
+thread = threading.Thread(target=refresh_weather, daemon=True)
+thread.start()
+
 root.mainloop()
