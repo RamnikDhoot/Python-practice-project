@@ -136,4 +136,9 @@ tk.Button(root, text="Save Report", command=save_report).pack()
 thread = threading.Thread(target=refresh_weather, daemon=True)
 thread.start()
 
-root.mainloop()
+if __name__ == "__main__":
+    # Start the refresh thread
+    refresh_thread = threading.Thread(target=refresh_weather, daemon=True)
+    refresh_thread.start()
+
+    root.mainloop()
