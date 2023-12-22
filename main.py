@@ -66,10 +66,24 @@ def plot_forecast(forecast_data):
     return plt.gcf()
 
 def display_weather():
+    global canvas_widget  # Make this a global variable to manage it later
     city = city_entry.get()
     unit = 'metric' if var.get() == 1 else 'imperial'
     forecast = forecast_var.get() == 1
-    weather_report = fetch_weather(city, "YOUR_API_KEY", unit, forecast)
+
+    if forecast:
+        forecast_data = fetch_weather(city, "YOUR_API_KEY", unit, True)
+        if 'list' in forecast_data:
+            if canvas_widget:  # Clear the previous canvas
+                canvas_widget.destroy()
+
+            fig = plot_forecast(forecast_data)
+            canvas = FigureCanvasTkAgg(fig, master=root)
+            canvas_widget = canvas.get_tk_widget()
+            canvas_widget.pack()
+            canvas.draw()
+        else:
+            messagebox.showerror("Error", "City Not Found or API Error")
 
     if "Error" in weather_report or "Not Found" in weather_report:
         messagebox.showerror("Error", weather_report)
