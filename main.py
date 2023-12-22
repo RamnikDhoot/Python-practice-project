@@ -9,6 +9,9 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import threading
 
 def fetch_weather(city, api_key, unit, forecast=False):
     base_url = "http://api.openweathermap.org/data/2.5/"
@@ -16,6 +19,7 @@ def fetch_weather(city, api_key, unit, forecast=False):
     unit_str = '°C' if unit == 'metric' else '°F'
     complete_url = f"{base_url}{url_type}?appid={api_key}&q={city}&units={unit}"
 
+    
     try:
         response = requests.get(complete_url)
         data = response.json()
@@ -88,6 +92,11 @@ def save_report():
                 file.write(report)
     else:
         messagebox.showinfo("Info", "No report to save.")
+
+def refresh_weather(interval=3600):
+    while True:
+        display_weather()
+        time.sleep(interval)
 
 # GUI setup
 root = tk.Tk()
