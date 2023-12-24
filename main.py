@@ -9,9 +9,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import threading
+
 
 def fetch_weather(city, api_key, unit, forecast=False):
     base_url = "http://api.openweathermap.org/data/2.5/"
@@ -65,16 +63,18 @@ def plot_forecast(forecast_data):
 
     return plt.gcf()
 
+canvas_widget = None  # Declare this at the top of your script
+
 def display_weather():
-    global canvas_widget  # Make this a global variable to manage it later
+    global canvas_widget
     city = city_entry.get()
     unit = 'metric' if var.get() == 1 else 'imperial'
     forecast = forecast_var.get() == 1
 
     if forecast:
-        forecast_data = fetch_weather(city, "YOUR_API_KEY", unit, True)
-        if 'list' in forecast_data:
-            if canvas_widget:  # Clear the previous canvas
+        forecast_data = fetch_weather(city, "test", unit, True)
+        if isinstance(forecast_data, dict) and 'list' in forecast_data:
+            if canvas_widget:
                 canvas_widget.destroy()
 
             fig = plot_forecast(forecast_data)
@@ -84,16 +84,18 @@ def display_weather():
             canvas.draw()
         else:
             messagebox.showerror("Error", "City Not Found or API Error")
-
-    if "Error" in weather_report or "Not Found" in weather_report:
-        messagebox.showerror("Error", weather_report)
     else:
-        result_text.delete(1.0, tk.END)
-        result_text.insert(tk.END, weather_report)
+        weather_report = fetch_weather(city, "test", unit, False)
+        if "Error" in weather_report or "Not Found" in weather_report:
+            messagebox.showerror("Error", weather_report)
+        else:
+            result_text.delete(1.0, tk.END)
+            result_text.insert(tk.END, weather_report)
 
 def refresh_weather(interval=3600):
     while True:
-        display_weather()
+        if city_entry.get():
+            display_weather()
         time.sleep(interval)
 
 def save_report():
@@ -150,8 +152,9 @@ tk.Button(root, text="Save Report", command=save_report).pack()
 thread = threading.Thread(target=refresh_weather, daemon=True)
 thread.start()
 
+canvas_widget = None
+
 if __name__ == "__main__":
-    # Start the refresh thread
     refresh_thread = threading.Thread(target=refresh_weather, daemon=True)
     refresh_thread.start()
 
