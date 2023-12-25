@@ -78,21 +78,33 @@ def get_historical_weather(city, api_key, unit='metric'):
     return "Historical Weather Data"
 
 def main():
-    api_key = "test"
-    city = input("Enter city name: ")
-    unit = input("Choose temperature unit - Celsius (C) or Fahrenheit (F): ").lower()
-    unit = 'metric' if unit == 'c' else 'imperial'
+    api_key = "YOUR_API_KEY"  # Replace with your actual API key
+    while True:
+        city = input("Enter city name (or 'exit' to quit): ")
+        if city.lower() == 'exit':
+            break
+        if not is_valid_city(city):
+            print("Invalid city name. Please try again.")
+            continue
 
-    choice = input("Choose option: 1. Current Weather 2. 5-Day Forecast\n")
+        unit = input("Choose temperature unit - Celsius (C) or Fahrenheit (F): ").lower()
+        unit = 'metric' if unit == 'c' else 'imperial'
 
-    if choice == '1':
-        print("\nCurrent Weather Report:")
-        print(get_weather(city, api_key, unit))  
-    elif choice == '2':
-        print("\nWeather Forecast:")
-        print(get_weather_forecast(city, api_key, unit))
-    else:
-        print("Invalid choice. Please select 1 or 2.")
+        choice = input("Choose option: 1. Current Weather 2. 5-Day Forecast 3. Historical Weather\n")
+
+        if not is_valid_choice(choice):
+            print("Invalid choice. Please select 1, 2, or 3.")
+            continue
+
+        if choice == '1':
+            print("\nCurrent Weather Report:")
+            print(get_weather_with_cache(city, api_key, unit))
+        elif choice == '2':
+            print("\nWeather Forecast:")
+            print(get_weather_with_cache(city, api_key, unit, True))
+        elif choice == '3':
+            print("\nHistorical Weather Data:")
+            print(get_historical_weather(city, api_key, unit))
 
 if __name__ == "__main__":
     main()
