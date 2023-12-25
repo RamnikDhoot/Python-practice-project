@@ -73,6 +73,10 @@ def is_valid_city(city):
 def is_valid_choice(choice):
     return choice in ['1', '2']
 
+def get_historical_weather(city, api_key, unit='metric'):
+    print("Fetching historical weather data is not implemented yet.")
+    return "Historical Weather Data"
+
 def main():
     api_key = "test"
     city = input("Enter city name: ")
