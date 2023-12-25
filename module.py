@@ -66,6 +66,12 @@ def get_weather_forecast(city, api_key, unit='metric'):
 
     except requests.RequestException as e:
         return f"Error retrieving weather forecast: {e}"
+    
+def is_valid_city(city):
+    return city.isalpha()
+
+def is_valid_choice(choice):
+    return choice in ['1', '2']
 
 def main():
     api_key = "test"
@@ -77,7 +83,7 @@ def main():
 
     if choice == '1':
         print("\nCurrent Weather Report:")
-        print(get_current_weather(city, api_key, unit))
+        print(get_weather(city, api_key, unit))  
     elif choice == '2':
         print("\nWeather Forecast:")
         print(get_weather_forecast(city, api_key, unit))
