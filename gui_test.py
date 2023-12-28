@@ -3,6 +3,17 @@ from tkinter import simpledialog
 import module
 import main
 
+def read_config(file_path):
+    config = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            key, value = line.strip().split('=')
+            config[key] = value
+    return config
+
+config = read_config('config.txt')
+api_key = config.get('api_key', 'test')
+
 def run_gui():
     def fetch_and_display():
         city = city_entry.get()
