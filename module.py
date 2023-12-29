@@ -1,8 +1,4 @@
-print("testing")
-print(__name__)
-#We can say that:
-    #when you run a file directly, its __name__ variable is set to __main__;
-    #when a file is imported as a module, its __name__ variable is set to the file's name (excluding .py)
+
 
 import os
 import requests

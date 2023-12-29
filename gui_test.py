@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog
-import module
-import main
+
+from module import get_weather_with_cache, get_historical_weather
 
 def read_config(file_path):
     config = {}
@@ -21,12 +21,17 @@ def run_gui():
         forecast = forecast_var.get() == 1
         choice = '3' if historical_var.get() == 1 else ('2' if forecast else '1')
 
-        if choice == '1':
-            result = get_weather_with_cache(city, api_key, unit)
-        elif choice == '2':
-            result = get_weather_with_cache(city, api_key, unit, True)
-        elif choice == '3':
-            result = get_historical_weather(city, api_key, unit)
+        result = ""  
+
+        try:
+            if choice == '1':
+                result = get_weather_with_cache(city, api_key, unit)
+            elif choice == '2':
+                result = get_weather_with_cache(city, api_key, unit, True)
+            elif choice == '3':
+                result = get_historical_weather(city, api_key, unit)
+        except Exception as e:
+            result = f"Error: {e}"  # Handle exceptions and display them in the GUI.
 
         result_label.config(text=result)
 
