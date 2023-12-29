@@ -103,5 +103,7 @@ def main():
             print(get_historical_weather(city, api_key, unit))
 
 if __name__ == "__main__":
-    main()
+    refresh_thread = threading.Thread(target=refresh_weather, daemon=True)
+    refresh_thread.start()
+    root.mainloop()
 
