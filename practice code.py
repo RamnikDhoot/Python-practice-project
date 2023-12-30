@@ -6,11 +6,6 @@ from platform import version
 from platform import python_implementation, python_version_tuple
 
 
-
-
-
-
-
 dir(os)
 #show you a list of the entities contained inside an imported module
 
