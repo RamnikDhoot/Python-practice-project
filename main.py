@@ -1,8 +1,42 @@
-import requests
-from bs4 import BeautifulSoup
+import aiohttp
+import asyncio
 import csv
+import os
+from bs4 import BeautifulSoup
 from datetime import datetime
+import logging
+from dotenv import load_dotenv
+import argparse
+import random
 
+# Load environment variables
+load_dotenv()
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+
+# Command-line arguments
+parser = argparse.ArgumentParser(description="News Web Scraper")
+parser.add_argument('--category', help='Category to scrape', default='')
+parser.add_argument('--pages', help='Number of pages to scrape', type=int, default=1)
+parser.add_argument('--output', help='Output CSV file name', default=f"news_headlines_{datetime.now().strftime('%Y-%m-%d')}.csv")
+args = parser.parse_args()
+
+USER_AGENTS = [
+    # List of user agents
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ..."
+    # Add more user agents
+]
+
+async def fetch(session, url):
+    headers = {'User-Agent': random.choice(USER_AGENTS)}
+    try:
+        async with session.get(url, headers=headers) as response:
+            return await response.text()
+    except Exception as e:
+        logging.error(f"Error fetching URL {url}: {e}")
+        return None
 def get_news_data(url, category=None):
     try:
         response = requests.get(url)
