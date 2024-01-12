@@ -1,3 +1,5 @@
+from http.client import REQUEST_ENTITY_TOO_LARGE
+from urllib import request
 import aiohttp
 import asyncio
 import csv
@@ -8,6 +10,25 @@ import logging
 from dotenv import load_dotenv
 import argparse
 import random
+import schedule
+import time
+import pymongo
+
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client["mydatabase"]
+collection = db["articles"]
+
+def save_to_db(data):
+    collection.insert_one(data)
+
+def job():
+    print("Scraping...")
+
+schedule.every(10).minutes.do(job)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
 
 # Load environment variables
 load_dotenv()
@@ -26,8 +47,13 @@ USER_AGENTS = [
     # List of user agents
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ..."
-    # Add more user agents
+    # Adding more user agents later
 ]
+def save_to_csv(articles, filename):
+    with open(filename, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Headline', 'URL', 'Publication Date'])
+        writer.writerows(articles)
 
 async def fetch(session, url):
     headers = {'User-Agent': random.choice(USER_AGENTS)}
@@ -39,9 +65,9 @@ async def fetch(session, url):
         return None
 def get_news_data(url, category=None):
     try:
-        response = requests.get(url)
+        response = request.get(url)
         response.raise_for_status()
-    except requests.RequestException as e:
+    except REQUEST_ENTITY_TOO_LARGE.RequestException as e:
         print(f"Error fetching URL: {e}")
         return []
 
@@ -67,18 +93,19 @@ def get_news_data(url, category=None):
 
     return articles
 
-def save_to_csv(articles, filename):
-    with open(filename, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Headline', 'URL', 'Publication Date'])
-        writer.writerows(articles)
+def clean_data(data):
+    ##################
+    return cleaned_data
+
+
+
 
 def main():
     url = 'https://www.bbc.co.uk/news'  
-    print("Enter a category to scrape (e.g., sports, politics), or leave blank for general headlines:")
+    print("Sports") #Category to scrape
     category = input().strip()
     
-    print("Enter the number of pages to scrape (default is 1):")
+    print("1") #How many pages to scrape
     num_pages = int(input().strip() or 1)
 
     all_articles = []
